@@ -65,7 +65,7 @@ bool q_insert_tail(struct list_head *head, const char *s)
 }
 
 /* Remove an element from head of queue */
-element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
+element_t *q_remove_head(const struct list_head *head, char *sp, size_t bufsize)
 {
     if (!head || list_empty(head))
         return NULL;
@@ -78,7 +78,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 }
 
 /* Remove an element from tail of queue */
-element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
+element_t *q_remove_tail(const struct list_head *head, char *sp, size_t bufsize)
 {
     if (!head || list_empty(head))
         return NULL;
@@ -107,14 +107,49 @@ int q_size(struct list_head *head)
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
-    // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    if (!head || list_empty(head))
+        return false;
+
+    element_t *tmp;
+    struct list_head *forward, *n_forward, *backward = head->prev;
+
+    list_for_each_safe (forward, n_forward, head) {
+        if (forward == backward) {
+            tmp = list_entry(forward, element_t, list);
+            list_del(forward);
+            q_release_element(tmp);
+            break;
+        } else if (n_forward == backward) {
+            tmp = list_entry(n_forward, element_t, list);
+            list_del(n_forward);
+            q_release_element(tmp);
+            break;
+        }
+        backward = backward->prev;
+    }
     return true;
 }
 
 /* Delete all nodes that have duplicate string */
-bool q_delete_dup(struct list_head *head)
+bool q_delete_dup(const struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return false;
+
+    element_t *curr = NULL, *next = NULL;
+    bool dul = false;
+    list_for_each_entry_safe (curr, next, head, list) {
+        if (curr->list.next != head && strcmp(curr->value, next->value) == 0) {
+            list_del(&curr->list);
+            q_release_element(curr);
+            dul = true;
+        } else if (dul) {
+            list_del(&curr->list);
+            q_release_element(curr);
+            dul = false;
+        }
+    }
+
     return true;
 }
 
