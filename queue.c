@@ -193,8 +193,70 @@ void q_swap(struct list_head *head)
     q_reverseK(head, 2);
 }
 
-/* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+/* Merge two sorted lists li1 and li2 into li1.
+ * When elements compare equal, the one from li1 is chosen first.
+ * The 'descend' flag selects sort order.
+ */
+static void _merge(struct list_head *li1, struct list_head *li2, bool descend)
+{
+    LIST_HEAD(tmp);
+
+    while (!list_empty(li1) && !list_empty(li2)) {
+        element_t *ele_1 = list_first_entry(li1, element_t, list);
+        element_t *ele_2 = list_first_entry(li2, element_t, list);
+        int cmp = strcmp(ele_1->value, ele_2->value);
+
+        if (descend) {
+            if (cmp >= 0)
+                list_move_tail(&ele_1->list, &tmp);
+            else
+                list_move_tail(&ele_2->list, &tmp);
+        } else {
+            if (cmp <= 0)
+                list_move_tail(&ele_1->list, &tmp);
+            else
+                list_move_tail(&ele_2->list, &tmp);
+        }
+    }
+    if (!list_empty(li1))
+        list_splice_tail_init(li1, &tmp);
+    if (!list_empty(li2))
+        list_splice_tail_init(li2, &tmp);
+
+    list_splice_init(&tmp, li1);
+}
+
+/* Merge sort elements of queue in ascending/descending order */
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    int size = 0;
+    struct list_head *pos;
+    list_for_each (pos, head) {
+        size++;
+    }
+    if (size < 2)
+        return;
+
+    int mid = size / 2;
+
+    LIST_HEAD(left);
+    LIST_HEAD(right);
+
+    for (int i = 0; i < mid; i++) {
+        list_move_tail(head->next, &left);
+    }
+    list_splice_init(head, &right);
+
+    q_sort(&left, descend);
+    q_sort(&right, descend);
+
+    _merge(&left, &right, descend);
+
+    list_splice_init(&left, head);
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
