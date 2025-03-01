@@ -48,24 +48,27 @@ bool q_insert(struct list_head *head,
         return false;
     }
     op(&new_element->list, head);
-    free(new_element);
+    /* cppcheck-suppress memleak */
     return true;
 }
 
 /* Insert an element at head of queue */
-bool q_insert_head(struct list_head *head, const char *s)
+/* cppcheck-suppress constParameterPointer */
+bool q_insert_head(struct list_head *head, char *s)
 {
     return q_insert(head, s, list_add);
 }
 
 /* Insert an element at tail of queue */
-bool q_insert_tail(struct list_head *head, const char *s)
+/* cppcheck-suppress constParameterPointer */
+bool q_insert_tail(struct list_head *head, char *s)
 {
     return q_insert(head, s, list_add_tail);
 }
 
 /* Remove an element from head of queue */
-element_t *q_remove_head(const struct list_head *head, char *sp, size_t bufsize)
+/* cppcheck-suppress constParameterPointer */
+element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
     if (!head || list_empty(head))
         return NULL;
@@ -78,7 +81,8 @@ element_t *q_remove_head(const struct list_head *head, char *sp, size_t bufsize)
 }
 
 /* Remove an element from tail of queue */
-element_t *q_remove_tail(const struct list_head *head, char *sp, size_t bufsize)
+/* cppcheck-suppress constParameterPointer */
+element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
     if (!head || list_empty(head))
         return NULL;
@@ -131,7 +135,8 @@ bool q_delete_mid(struct list_head *head)
 }
 
 /* Delete all nodes that have duplicate string */
-bool q_delete_dup(const struct list_head *head)
+/* cppcheck-suppress constParameterPointer */
+bool q_delete_dup(struct list_head *head)
 {
     if (!head || list_empty(head))
         return false;
@@ -304,6 +309,7 @@ int q_descend(struct list_head *head)
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
  * order */
+/* cppcheck-suppress constParameterPointer */
 int q_merge(struct list_head *head, bool descend)
 {
     if (!head || list_empty(head) || list_is_singular(head))
