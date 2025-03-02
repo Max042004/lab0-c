@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "harness.h"
 #include "queue.h"
 
 /* Create an empty queue */
