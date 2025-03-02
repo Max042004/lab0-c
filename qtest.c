@@ -1056,6 +1056,51 @@ static bool do_next(int argc, char *argv[])
     return q_show(0);
 }
 
+/* shuffle nodes in queue */
+bool q_shuffle(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return false;
+
+    int len = q_size(head), i = 0;
+    element_t **arr = malloc(len * sizeof(element_t));
+    if (!arr)
+        return false;
+    struct list_head *curr;
+    list_for_each (curr, head) {
+        arr[i++] = list_entry(curr, element_t, list);
+    }
+    srand(time(NULL));
+
+    for (int k = len - 1; k > 0; k--) {
+        int j = rand() % k;
+        // exchange the value pointer of arr[k] and arr[j]
+        char *tmp = arr[k]->value;
+        arr[k]->value = arr[j]->value;
+        arr[j]->value = tmp;
+    }
+
+    free(arr);
+
+    return true;
+}
+
+static bool do_shuffle(int argc, char *argv[])
+{
+    if (!current || !current->q) {
+        report(3, "Warning: Calling shuffle on null queue");
+        return false;
+    }
+    error_check();
+
+    if (exception_setup(true))
+        q_shuffle(current->q);
+    exception_cancel();
+
+    q_show(3);
+    return 1;
+}
+
 static void console_init()
 {
     ADD_COMMAND(new, "Create new queue", "");
@@ -1096,6 +1141,7 @@ static void console_init()
                 "");
     ADD_COMMAND(reverseK, "Reverse the nodes of the queue 'K' at a time",
                 "[K]");
+    ADD_COMMAND(shuffle, "Shuffle the nodes of the queue", "");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",
