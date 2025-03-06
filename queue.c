@@ -239,21 +239,19 @@ void q_sort(struct list_head *head, bool descend)
         return;
 
     int size = 0;
-    struct list_head *pos;
+    struct list_head *pos, *slow = head;
     list_for_each (pos, head) {
         size++;
+        if (size % 2 == 0)
+            slow = slow->next;
     }
     if (size < 2)
         return;
 
-    int mid = size / 2;
-
     LIST_HEAD(left);
     LIST_HEAD(right);
 
-    for (int i = 0; i < mid; i++) {
-        list_move_tail(head->next, &left);
-    }
+    list_cut_position(&left, head, slow);
     list_splice_init(head, &right);
 
     q_sort(&left, descend);
