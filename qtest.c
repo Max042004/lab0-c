@@ -1090,17 +1090,25 @@ bool q_shuffle(struct list_head *head)
 
 static bool do_shuffle(int argc, char *argv[])
 {
+    if (argc != 2) {
+        report(1, "Usage: shuffle <times>");
+        return false;
+    }
+
     if (!current || !current->q) {
         report(3, "Warning: Calling shuffle on null queue");
         return false;
     }
     error_check();
 
-    if (exception_setup(true))
-        q_shuffle(current->q);
-    exception_cancel();
 
-    q_show(3);
+    int n = atoi(argv[1]);
+    for (int i = 0; i < n; i++) {
+        if (exception_setup(true))
+            q_shuffle(current->q);
+        exception_cancel();
+        q_show(3);
+    }
     return 1;
 }
 
@@ -1144,7 +1152,7 @@ static void console_init()
                 "");
     ADD_COMMAND(reverseK, "Reverse the nodes of the queue 'K' at a time",
                 "[K]");
-    ADD_COMMAND(shuffle, "Shuffle the nodes of the queue", "");
+    ADD_COMMAND(shuffle, "Shuffle the nodes of the queue", "[N]");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",
