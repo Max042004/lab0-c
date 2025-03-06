@@ -1070,7 +1070,6 @@ bool q_shuffle(struct list_head *head)
     list_for_each (curr, head) {
         arr[i++] = list_entry(curr, element_t, list);
     }
-    srand(time(NULL));
 
     for (int k = len - 1; k > 0; k--) {
         int j = rand() % k;
