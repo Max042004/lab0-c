@@ -24,8 +24,7 @@ void q_free(struct list_head *head)
         return;
 
     element_t *curr = NULL, *n;
-    list_for_each_entry_safe (curr, n, head, list) {
-        list_del(&curr->list);
+    list_for_each_entry_safe(curr, n, head, list) {
         q_release_element(curr);
     }
     free(head);
@@ -104,7 +103,7 @@ int q_size(struct list_head *head)
     int len = 0;
     struct list_head *li;
 
-    list_for_each (li, head)
+    list_for_each(li, head)
         len++;
     return len;
 }
@@ -112,50 +111,41 @@ int q_size(struct list_head *head)
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
-    if (!head || list_empty(head))
+    if (!head || list_empty(head) || list_is_singular(head))
         return false;
 
     element_t *tmp;
-    struct list_head *forward, *n_forward, *backward = head->prev;
-
-    list_for_each_safe (forward, n_forward, head) {
-        if (forward == backward) {
-            tmp = list_entry(forward, element_t, list);
-            list_del(forward);
-            q_release_element(tmp);
-            break;
-        } else if (n_forward == backward) {
-            tmp = list_entry(n_forward, element_t, list);
-            list_del(n_forward);
-            q_release_element(tmp);
-            break;
-        }
-        backward = backward->prev;
+    struct list_head **indir = &(head->next), *fast = head->next;
+    for (; fast != head && fast->next != head; fast = fast->next->next) {
+        indir = &(*indir)->next;
     }
+    tmp = list_entry(*indir, element_t, list);
+    list_del(*indir);
+    q_release_element(tmp);
+
     return true;
 }
 
-/* Delete all nodes that have duplicate string */
+/* Delete all nodes of a sorted list that have duplicate string */
 /* cppcheck-suppress constParameterPointer */
 bool q_delete_dup(struct list_head *head)
 {
-    if (!head || list_empty(head))
+    if (!head || list_empty(head) || list_is_singular(head))
         return false;
 
     element_t *curr = NULL, *next = NULL;
     bool dul = false;
-    list_for_each_entry_safe (curr, next, head, list) {
-        if (curr->list.next != head && strcmp(curr->value, next->value) == 0) {
+    list_for_each_entry_safe(curr, next, head, list) {
+        bool is_same =
+            (curr->list.next != head && strcmp(curr->value, next->value) == 0)
+                ? true
+                : false;
+        if (is_same || dul) {
             list_del(&curr->list);
             q_release_element(curr);
-            dul = true;
-        } else if (dul) {
-            list_del(&curr->list);
-            q_release_element(curr);
-            dul = false;
         }
+        dul = is_same;
     }
-
     return true;
 }
 
@@ -166,7 +156,7 @@ void q_reverse(struct list_head *head)
         return;
 
     struct list_head *curr, *next;
-    list_for_each_safe (curr, next, head) {
+    list_for_each_safe(curr, next, head) {
         list_move(curr, head);
     }
 }
@@ -181,7 +171,7 @@ void q_reverseK(struct list_head *head, int k)
 
     LIST_HEAD(dummy);
 
-    list_for_each_safe (curr, next, head) {
+    list_for_each_safe(curr, next, head) {
         i++;
         if (i == k) {
             list_cut_position(&dummy, tmp, curr);
@@ -240,7 +230,7 @@ void q_sort(struct list_head *head, bool descend)
 
     int size = 0;
     struct list_head *pos, *slow = head;
-    list_for_each (pos, head) {
+    list_for_each(pos, head) {
         size++;
         if (size % 2 == 0)
             slow = slow->next;
