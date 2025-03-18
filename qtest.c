@@ -1074,9 +1074,9 @@ bool q_shuffle(struct list_head *head)
     for (int k = len - 1; k > 0; k--) {
         int j = rand() % k;
         // exchange the value pointer of arr[k] and arr[j]
-        *(u_int64_t *) &arr[k]->value ^= (u_int64_t) arr[j]->value;
-        *(u_int64_t *) &arr[j]->value ^= (u_int64_t) arr[k]->value;
-        *(u_int64_t *) &arr[k]->value ^= (u_int64_t) arr[j]->value;
+        char *tmp = arr[k]->value;
+        arr[k]->value = arr[j]->value;
+        arr[j]->value = tmp;
     }
 
     free(arr);
